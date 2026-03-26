@@ -14,6 +14,7 @@ export function ShopPage() {
   const { user } = useAuth()
 
   const [shop, setShop] = useState(null)
+  const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
   const [notes, setNotes] = useState('')
   const [firstMessage, setFirstMessage] = useState('')
@@ -27,6 +28,15 @@ export function ShopPage() {
       try {
         const { data } = await api.get(`/api/shops/${id}`)
         if (mounted) setShop(data.shop)
+        // load past messages for logged in users
+        if (user) {
+          try {
+            const { data: msgs } = await api.get(`/api/shops/${id}/messages`)
+            if (mounted) setMessages(msgs.messages || [])
+          } catch (e) {
+            // ignore if no access or no messages
+          }
+        }
       } catch (e) {
         if (mounted) setError(e?.response?.data?.error || 'Failed to load shop')
       } finally {
@@ -158,6 +168,28 @@ export function ShopPage() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="text-lg font-semibold">Past messages</div>
+              <div className="text-sm text-zinc-400 mt-1">Conversation history with this shop (your orders)</div>
+            </CardHeader>
+            <CardContent>
+              {messages.length === 0 ? (
+                <div className="text-sm text-zinc-400">No past messages found.</div>
+              ) : (
+                <div className="grid gap-3">
+                  {messages.map((m) => (
+                    <div key={m._id} className="rounded-xl border border-zinc-800 p-3">
+                      <div className="text-sm text-zinc-200">{m.text}</div>
+                      <div className="text-xs text-zinc-500 mt-1">From: {m.senderId?.name || m.senderId} — {new Date(m.createdAt).toLocaleString()}</div>
+                      <div className="text-xs text-zinc-400 mt-1">Order: {m.orderId}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
