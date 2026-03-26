@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useNotify } from '../lib/notify'
 import { Button } from './ui/Button'
 import { cn } from '../lib/utils'
 
@@ -21,6 +22,7 @@ function TopLink({ to, children }) {
 
 export function Layout({ children }) {
   const { user, logout } = useAuth()
+  const notify = useNotify()
 
   return (
     <div className="min-h-full bg-[radial-gradient(1200px_600px_at_20%_-20%,rgba(255,255,255,0.12),transparent),radial-gradient(1000px_700px_at_100%_0%,rgba(56,189,248,0.12),transparent)]">
@@ -40,7 +42,16 @@ export function Layout({ children }) {
                 <span className="text-xs text-zinc-400 hidden sm:block">
                   {user.name} · {user.role}
                 </span>
-                <Button variant="secondary" size="sm" onClick={logout}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    const ok = window.confirm('Are you sure you want to logout?')
+                    if (!ok) return
+                    logout()
+                    notify('success', 'Logged out successfully')
+                  }}
+                >
                   Logout
                 </Button>
               </>
