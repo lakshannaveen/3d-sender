@@ -1,0 +1,19 @@
+# Node modules
+node_modules/
+
+# Local env files
+.env
+backend/.env
+frontend/.env
+.env.local
+.env.*
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+
+# Uploads (if you don't want to push large uploaded files)
+backend/uploads/
