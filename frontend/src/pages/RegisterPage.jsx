@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useNotify } from '../lib/notify'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
@@ -8,6 +9,7 @@ import { Button } from '../components/ui/Button'
 export function RegisterPage() {
   const nav = useNavigate()
   const { register } = useAuth()
+  const notify = useNotify()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -21,9 +23,12 @@ export function RegisterPage() {
     setError('')
     try {
       await register({ name, email, password, role })
+      notify('success', 'Account created')
       nav('/shops')
     } catch (err) {
-      setError(err?.response?.data?.error || 'Registration failed')
+      const msg = err?.response?.data?.error || 'Registration failed'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setLoading(false)
     }

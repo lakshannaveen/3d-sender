@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api } from '../lib/api'
+import { useNotify } from '../lib/notify'
 import { useAuth } from '../lib/auth'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -18,6 +19,7 @@ export function ShopPage() {
   const [firstMessage, setFirstMessage] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
+  const notify = useNotify()
 
   useEffect(() => {
     let mounted = true
@@ -46,9 +48,12 @@ export function ShopPage() {
         notes,
         firstMessage,
       })
+      notify('success', 'Order created')
       nav(`/orders/${data.order._id}`)
     } catch (e) {
-      setError(e?.response?.data?.error || 'Failed to create order')
+      const msg = e?.response?.data?.error || 'Failed to create order'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setCreating(false)
     }

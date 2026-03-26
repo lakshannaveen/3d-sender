@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { useNotify } from '../lib/notify'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
@@ -8,6 +9,7 @@ import { Button } from '../components/ui/Button'
 export function LoginPage() {
   const nav = useNavigate()
   const { login } = useAuth()
+  const notify = useNotify()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -19,9 +21,12 @@ export function LoginPage() {
     setError('')
     try {
       await login(email, password)
+      notify('success', 'Logged in successfully')
       nav('/shops')
     } catch (err) {
-      setError(err?.response?.data?.error || 'Login failed')
+      const msg = err?.response?.data?.error || 'Login failed'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setLoading(false)
     }

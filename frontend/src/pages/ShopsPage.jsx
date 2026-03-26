@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import { useNotify } from '../lib/notify'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
@@ -11,6 +12,7 @@ export function ShopsPage() {
   const [shops, setShops] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const notify = useNotify()
 
   async function load() {
     setLoading(true)
@@ -19,7 +21,9 @@ export function ShopsPage() {
       const { data } = await api.get('/api/shops', { params: q.trim() ? { q } : {} })
       setShops(data.shops || [])
     } catch (e) {
-      setError(e?.response?.data?.error || 'Failed to load shops')
+      const msg = e?.response?.data?.error || 'Failed to load shops'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setLoading(false)
     }

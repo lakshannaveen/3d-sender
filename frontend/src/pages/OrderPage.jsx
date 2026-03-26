@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { CheckCircle2, Clock3, Package, Send, UploadCloud, Truck } from 'lucide-react'
 import { api } from '../lib/api'
+import { useNotify } from '../lib/notify'
 import { useAuth } from '../lib/auth'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -26,6 +27,7 @@ export function OrderPage() {
   const [uploading, setUploading] = useState(false)
   const [statusLoading, setStatusLoading] = useState(false)
   const bottomRef = useRef(null)
+  const notify = useNotify()
 
   const socket = useMemo(() => {
     if (!token) return null
@@ -43,7 +45,9 @@ export function OrderPage() {
       setMessages(data.messages || [])
       setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: 'instant', block: 'end' }), 0)
     } catch (e) {
-      setError(e?.response?.data?.error || 'Failed to load order')
+      const msg = e?.response?.data?.error || 'Failed to load order'
+      setError(msg)
+      notify('error', String(msg))
     }
   }
 
@@ -83,8 +87,11 @@ export function OrderPage() {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
       setOrder(data.order)
+      notify('success', 'PDF uploaded')
     } catch (e) {
-      setError(e?.response?.data?.error || 'Upload failed')
+      const msg = e?.response?.data?.error || 'Upload failed'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setUploading(false)
     }
@@ -96,8 +103,11 @@ export function OrderPage() {
     try {
       const { data } = await api.post(`/api/orders/${id}/status`, { status })
       setOrder(data.order)
+      notify('success', 'Status updated')
     } catch (e) {
-      setError(e?.response?.data?.error || 'Failed to update status')
+      const msg = e?.response?.data?.error || 'Failed to update status'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setStatusLoading(false)
     }

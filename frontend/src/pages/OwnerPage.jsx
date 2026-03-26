@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import { useNotify } from '../lib/notify'
 import { Card, CardContent, CardHeader } from '../components/ui/Card'
 import { Input } from '../components/ui/Input'
 import { Button } from '../components/ui/Button'
@@ -20,6 +21,7 @@ export function OwnerPage() {
   const [creating, setCreating] = useState(false)
   const [loadingOrders, setLoadingOrders] = useState(false)
   const [error, setError] = useState('')
+  const notify = useNotify()
 
   async function loadOrders() {
     setLoadingOrders(true)
@@ -28,7 +30,9 @@ export function OwnerPage() {
       const { data } = await api.get('/api/orders/mine')
       setOrders(data.orders || [])
     } catch (e) {
-      setError(e?.response?.data?.error || 'Failed to load orders')
+      const msg = e?.response?.data?.error || 'Failed to load orders'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setLoadingOrders(false)
     }
@@ -50,8 +54,11 @@ export function OwnerPage() {
       })
       setShopName('')
       setShopDescription('')
+      notify('success', 'Shop created')
     } catch (e) {
-      setError(e?.response?.data?.error || 'Failed to create shop')
+      const msg = e?.response?.data?.error || 'Failed to create shop'
+      setError(msg)
+      notify('error', String(msg))
     } finally {
       setCreating(false)
     }
